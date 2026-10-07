@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h3 class="mb-4">Hi, {{ user.username }} 👋</h3>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card text-bg-primary shadow-sm"><div class="card-body">
+            <h6>Total Tasks</h6><h2>{{ stats.total }}</h2></div></div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-bg-success shadow-sm"><div class="card-body">
+            <h6>Completed</h6><h2>{{ stats.completed }}</h2></div></div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-bg-warning shadow-sm"><div class="card-body">
+            <h6>Pending</h6><h2>{{ stats.pending }}</h2></div></div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-bg-danger shadow-sm"><div class="card-body">
+            <h6>Overdue</h6><h2>{{ stats.overdue }}</h2></div></div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white"><strong>⏰ Upcoming Tasks</strong></div>
+            <ul class="list-group list-group-flush">
+                {% for t in upcoming %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-semibold">{{ t.title }}</div>
+                            <small class="text-muted">{{ t.subject.name }} — {{ t.deadline.strftime('%b %d, %Y %H:%M') }}</small>
+                        </div>
+                        <form method="POST" action="{{ url_for('toggle_task', task_id=t.id) }}">
+                            <button class="btn btn-sm btn-outline-success"><i class="bi bi-check2"></i></button>
+                        </form>
+                    </li>
+                {% else %}
+                    <li class="list-group-item text-muted text-center">No upcoming tasks 🎉</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white"><strong>⚠️ Overdue Tasks</strong></div>
+            <ul class="list-group list-group-flush">
+                {% for t in overdue %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-semibold text-danger">{{ t.title }}</div>
+                            <small class="text-muted">{{ t.subject.name }} — {{ t.deadline.strftime('%b %d, %Y %H:%M') }}</small>
+                        </div>
+                        <form method="POST" action="{{ url_for('toggle_task', task_id=t.id) }}">
+                            <button class="btn btn-sm btn-outline-success"><i class="bi bi-check2"></i></button>
+                        </form>
+                    </li>
+                {% else %}
+                    <li class="list-group-item text-muted text-center">Nothing overdue. Great job! ✅</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

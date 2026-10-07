@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block title %}Tasks{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white"><strong>Add Task</strong></div>
+            <div class="card-body">
+                {% if subjects %}
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Title</label>
+                        <input type="text" name="title" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea name="description" rows="2" class="form-control"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Subject</label>
+                        <select name="subject_id" class="form-select" required>
+                            {% for s in subjects %}
+                                <option value="{{ s.id }}">{{ s.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Deadline</label>
+                        <input type="datetime-local" name="deadline" class="form-control" required>
+                    </div>
+                    <button class="btn btn-primary w-100">Add Task</button>
+                </form>
+                {% else %}
+                <p class="text-muted">Add a <a href="{{ url_for('subjects') }}">subject</a> first.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h5 class="mb-0">Your Tasks</h5>
+            <div class="btn-group btn-group-sm">
+                <a class="btn btn-outline-secondary {{ 'active' if filter_by=='all' }}"
+                   href="{{ url_for('tasks', filter='all') }}">All</a>
+                <a class="btn btn-outline-secondary {{ 'active' if filter_by=='pending' }}"
+                   href="{{ url_for('tasks', filter='pending') }}">Pending</a>
+                <a class="btn btn-outline-secondary {{ 'active' if filter_by=='completed' }}"
+                   href="{{ url_for('tasks', filter='completed') }}">Completed</a>
+                <a class="btn btn-outline-secondary {{ 'active' if filter_by=='overdue' }}"
+                   href="{{ url_for('tasks', filter='overdue') }}">Overdue</a>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <ul class="list-group list-group-flush">
+                {% for t in tasks %}
+                {% set is_overdue = (not t.completed) and (t.deadline < now) %}
+                <li class="list-group-item d-flex justify-content-between align-items-start
+                           {{ 'opacity-50' if t.completed }}">
+                    <div class="me-3">
+                        <div class="fw-semibold {{ 'text-decoration-line-through' if t.completed }}">
+                            {{ t.title }}
+                        </div>
+                        {% if t.description %}
+                        <div class="small text-muted">{{ t.description }}</div>
+                        {% endif %}
+                        <small>
+                            <span class="badge" style="background: {{ t.subject.color }}">{{ t.subject.name }}</span>
+                            <span class="{{ 'text-danger fw-bold' if is_overdue else 'text-muted' }}">
+                                <i class="bi bi-clock"></i> {{ t.deadline.strftime('%b %d, %Y %H:%M') }}
+                                {% if is_overdue %}(overdue){% endif %}
+                            </span>
+                        </small>
+                    </div>
+                    <div class="d-flex gap-1">
+                        <form method="POST" action="{{ url_for('toggle_task', task_id=t.id) }}">
+                            <button class="btn btn-sm {{ 'btn-success' if t.completed else 'btn-outline-success' }}">
+                                <i class="bi bi-check2"></i>
+                            </button>
+                        </form>
+                        <form method="POST" action="{{ url_for('delete_task', task_id=t.id) }}"
+                              onsubmit="return confirm('Delete this task?')">
+                            <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                        </form>
+                    </div>
+                </li>
+                {% else %}
+                <li class="list-group-item text-muted text-center py-4">No tasks to show.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

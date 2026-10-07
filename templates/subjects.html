@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Subjects{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white"><strong>Add Subject</strong></div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Subject Name</label>
+                        <input type="text" name="name" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Color</label>
+                        <input type="color" name="color" class="form-control form-control-color" value="#0d6efd">
+                    </div>
+                    <button class="btn btn-primary w-100">Add Subject</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white"><strong>Your Subjects</strong></div>
+            <ul class="list-group list-group-flush">
+                {% for s in subjects %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="badge rounded-pill me-2" style="background: {{ s.color }}">&nbsp;</span>
+                        <strong>{{ s.name }}</strong>
+                        <small class="text-muted ms-2">({{ s.tasks|length }} tasks)</small>
+                    </div>
+                    <form method="POST" action="{{ url_for('delete_subject', subject_id=s.id) }}"
+                          onsubmit="return confirm('Delete subject and all its tasks?')">
+                        <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                    </form>
+                </li>
+                {% else %}
+                <li class="list-group-item text-muted text-center">No subjects yet. Add one!</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
