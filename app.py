@@ -1,16 +1,13 @@
+import os
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from functools import wraps
-import os
 from models import db, User, Subject, Task
 
 app = Flask(__name__)
 
-# Read DATABASE_URL from environment (Vercel + Neon), fall back to SQLite locally
 database_url = os.environ.get('DATABASE_URL', 'sqlite:///study.db')
-
-# Neon/Heroku sometimes give postgres:// which SQLAlchemy rejects
 if database_url.startswith('postgres://'):
     database_url = database_url.replace('postgres://', 'postgresql://', 1)
 
