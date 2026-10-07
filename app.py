@@ -7,18 +7,26 @@ from models import db, User, Subject, Task
 
 app = Flask(__name__)
 
-database_url = os.environ.get('DATABASE_URL', 'sqlite:///study.db')
+# ---------- Config ----------
+# On Vercel set DATABASE_URL (Neon/Supabase Postgres).
+# The /tmp SQLite fallback only exists so the app doesn't crash; data there is temporary.
+database_url = os.environ.get('DATABASE_URL', 'sqlite:////tmp/study.db')
 if database_url.startswith('postgres://'):
     database_url = database_url.replace('postgres://', 'postgresql://', 1)
 
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'change-this-to-a-random-secret-key')
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'pool_pre_ping': True}
 
 db.init_app(app)
 
+# Don't let a database problem crash the whole app on startup
 with app.app_context():
-    db.create_all()
+    try:
+        db.create_all()
+    except Exception as e:
+        print('DB init error:', e)
 
 
 # ---------- Helpers ----------
@@ -33,7 +41,7 @@ def login_required(f):
 
 
 def current_user():
-    return User.query.get(session['user_id'])
+    return db.session.get(User, session['user_id'])
 
 
 # ---------- Auth routes ----------
